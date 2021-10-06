@@ -78,7 +78,7 @@ public:
             }
         }
     }
-    void setParentTags (const vector<Tag>& tags)
+    void setParentTags (vector<Tag> tags)
     {
         this->parentTags = tags;
     }
@@ -139,36 +139,34 @@ vector<Tag> setParentTags(const vector <Tag>& tags, const string& tagName)
             }
         }
     }
+
     return parentTags;
 }
 
 
-void updateTagsWithParentTags(const vector<Tag>& tags)
+vector <Tag> updateTagsWithParentTags(const vector<Tag>& tags)
 {
+    vector <Tag> tags_ = {};
     for (Tag tag : tags)
     {
         vector<Tag> tempParentTags=setParentTags(tags, tag.name);
-        tag.parentTags.insert(tag.parentTags.begin(), tempParentTags.begin(), tempParentTags.end());
-        cout<<"Parent tags for "<< tag.name <<":"<< endl;
-        tag.getParentTags();
+        tag.setParentTags(tempParentTags);
+        tags_.push_back(tag);
+        //cout<<"Parent tags for "<< tag.name <<":"<< endl;
+        //tag.getParentTags();
     }
-    cout<<"Update done"<<endl;
+    //cout<<"Update done"<<endl;
+    return tags_;
 }
 
 class Query
 {
 public:
-    //string query ="";
     bool complexQuery=false;
     string tagName="";
-    //string output="";
     string tempAttKey="";
     string::size_type posTilde = string::npos;
     string::size_type posDot =string::npos;
-    //string::size_type prevDot;
-    //bool attFound = false;
-    vector<Tag> parentTags={};
-    //Tag tempParentTag;
     string properQuery = "";
 
     void setPosDotAndPosTilde(const string& input)
@@ -205,50 +203,21 @@ public:
         }
     }
 
-    /*void setParentTags(const vector <Tag>& tags)
+    void setProperQuery(const vector <Tag>& tags)
     {
-        for (auto it=tags.begin(); it<tags.end(); ++it)
-        {
-            if ((*it).name==tagName)
+        for (auto tag : tags)
+            if (tag.name==this->tagName)
             {
-                for (auto it2=tags.begin(); it2<it; ++it2)
+                if (tag.parentTags.size()!=0)
                 {
-                    this->parentTags.push_back(*it2);
-                }
-                break;
-            }
-        }
-
-        if (parentTags.begin()!=parentTags.end())
-        {
-            for (auto it=parentTags.begin(); it<(parentTags.end()-1); ++it)
-            {
-                for (auto it2=(it+1); it2<parentTags.end(); ++it2)
-                {
-                    //cout << "Parent tag: " << (*it2).name << "has on 0 pos: " << (*it2).name[0] <<endl;
-                    //cout<< "Its name without / is: "<< (*it2).name.substr(1,(*it2).name.size())<<endl;
-                    if ((*it2).name[0]=='/' && (*it2).name.substr(1,(*it2).name.size())==(*it).name)
+                    //cout<< tempTag << " is complex tag. Parents: " << endl;
+                    for (auto tag_: tag.parentTags)
                     {
-                        this->parentTags.erase(it2);
-                        this->parentTags.erase(it);
-                        break;
+                        this->properQuery+=tag_.name + ".";
+                        //cout<< tag.name <<" "<< endl;
                     }
                 }
             }
-        }
-    }*/
-
-    void setProperQuery()
-    {
-        if (complexQuery)
-        {
-            //cout<< tempTag << " is complex tag. Parents: " << endl;
-            for (auto tag: parentTags)
-            {
-                this->properQuery+=tag.name + ".";
-                //cout<< tag.name <<" "<< endl;
-            }
-        }
     }
 
     Query(const string& input_, const vector <Tag>& tags_)
@@ -258,8 +227,8 @@ public:
         setPosDotAndPosTilde(input);
         setTagNameAndComplexQuery(input);
         setTempAttKey(input);
-        parentTags = setParentTags(tags, tagName);
-        setProperQuery();
+        //parentTags = setParentTags(tags, tagName);
+        setProperQuery(tags_);
     }
 
 };
@@ -284,7 +253,10 @@ string getOutput(string input, const vector<Tag>& tags)
                    //cout<<att.second<<" is found att value"<< endl;
                     if (att.first==query.tempAttKey)
                     {
-                        if (query.complexQuery)
+                        //cout<<"Size of parent tags for "<<tag.name<<" :"<<tag.parentTags.size()<<endl;
+                        //cout<<"After getparentTag" <<endl;
+                        //tag.getParentTags();
+                        if (query.complexQuery || tag.parentTags.size()!=0)
                         {
                             //cout<<query.tagName<<" in if"<< endl;
                             if (input.substr(0, query.posDot+1)==query.properQuery)
@@ -343,54 +315,12 @@ int main()
     }
 
     tags = setTags(inputsForTags);
-    updateTagsWithParentTags(tags);
-    vector <string> dummyNames ={"a","b","c","d","e"};
-    //vector <vector <Tag>> dummyParentVectors = {};
-
-    /*for (auto tag : tags)
-    {
-       cout<< tag.name <<endl;
-        for (const auto& [key, value] : tag.attributes)
-        {
-            cout << key << " = " << value << endl;
-        }
-    }*/
+    tags=updateTagsWithParentTags(tags);
 
     for (string inputForQuery_ : inputsForQueries)
     {
        cout<< getOutput(inputForQuery_, tags)<<endl;
     }
-
-    for (auto tag : tags)
-    {
-        cout<<"Parent tags for "<< tag.name <<":"<< endl;
-        for (auto parentTag : tag.parentTags)
-            cout<<parentTag.name<<endl;
-    }
-
-    for (auto tag : tags)
-    {
-        cout<<"Parent tags for "<< tag.name <<":"<< endl;
-        tag.getParentTags();
-    }
-
-    //!!!TO DO setParentTags wywolana raz i vector<Tag> parentTags stworzony raz i wspolny dla wszystkich obiektow,
-    //usunac z klas Query i Tag, nizej wzkazowka jak go stworzyc
-
-    for (auto tag : tags)
-    {
-        vector <Tag> dummyParentVector= setParentTags(tags, tag.name);
-        cout<<"Dummy parents for "<<tag.name<<" :"<<endl;
-        for(auto dummyParent : dummyParentVector)
-        {
-            cout<<dummyParent.name<<endl;
-        }
-    }
-
-    /*cout<< "For dummyVectors:"<<endl;
-    for (auto dummyParentVector :dummyParentVectors)
-        cout<< tag.name << endl;*/
-
 
     return 0;
 }
