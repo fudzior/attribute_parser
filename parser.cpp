@@ -78,7 +78,7 @@ public:
             }
         }
     }
-    void setParentTags (vector<Tag> tags)
+    void setParentTags (const vector<Tag> tags)
     {
         this->parentTags = tags;
     }
