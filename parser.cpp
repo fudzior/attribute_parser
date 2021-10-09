@@ -97,12 +97,15 @@ vector<Tag> setTags(const vector<string>& inputs)
 
     for (auto input: inputs)
     {
+        //if ((input.substr(0,4)=="<tag") || (input.substr(0,5)=="</tag"))
+        //{
         Tag tempTag;
         int positionAfterName = tempTag.setName(input);
         tempTag.setAttributes(input,positionAfterName);
         tags.push_back(tempTag);
+        //}
     }
-
+    //cout<<"in setTags funcion"<<endl;
     return tags;
 }
 
@@ -122,24 +125,69 @@ vector<Tag> setParentTags(const vector <Tag>& tags, const string& tagName)
         }
     }
 
+    /*if (tagName=="tag7")
+    {
+        cout<<"Parent tags for tag7 before erase:"<<endl;
+      for (auto tag : parentTags)
+      {
+          cout<<tag.name<<endl;
+      }
+      cout<<"From setparenttags for "<<tagName<<endl<<":"<<endl;
+    }*/
+
     if (parentTags.begin()!=parentTags.end())
     {
-        for (auto it=parentTags.begin(); it<(parentTags.end()-1); ++it)
+        for (auto it=parentTags.begin(); it<(parentTags.end()-1);)
         {
-            for (auto it2=(it+1); it2<parentTags.end(); ++it2)
+            bool itEreased =false;
+            /*if (tagName=="tag7")
+                cout<< "Looking for /tag for tag:"<<(*it).name<<endl;*/
+            for (auto it2=(it+1); it2<parentTags.end();)
             {
-                //cout << "Parent tag: " << (*it2).name << "has on 0 pos: " << (*it2).name[0] <<endl;
-                //cout<< "Its name without / is: "<< (*it2).name.substr(1,(*it2).name.size())<<endl;
+                /*if (tagName=="tag7")
+                    cout<<(*it2).name<<endl;
+                if (tagName=="tag7")
+                {
+                    cout << "Parent tag: " << (*it2).name << "has on 0 pos: " << (*it2).name[0] <<endl;
+                    cout<< "Its name without / is: "<< (*it2).name.substr(1,(*it2).name.size())<<endl;
+                }*/
                 if ((*it2).name[0]=='/' && (*it2).name.substr(1,(*it2).name.size())==(*it).name)
                 {
+                    /*if (tagName=="tag7")
+                    {
+                        cout<<"(*it).name="<<(*it).name<<endl;
+                        cout<<"(*it2).name.substr(1,(*it2).name.size())="<<(*it2).name.substr(1,(*it2).name.size())<<endl;
+                        cout<<"Erase it2:"<<(*it2).name<<endl;
+                    }*/
                     parentTags.erase(it2);
+                    /*if (tagName=="tag7")
+                    {
+                        cout<<"After erase it2="<<(*it2).name<<endl;
+                        cout<<"Erase it:"<<(*it).name<<endl;
+                    }*/
                     parentTags.erase(it);
+                    itEreased=true;
+                    /*if (tagName=="tag7")
+                        cout<<"After erase it="<<(*it).name<<endl;*/
                     break;
                 }
+                else
+                {
+                    ++it2;
+                }
             }
+            if (!itEreased)
+                ++it;
         }
     }
 
+    /*cout<<"Parent tags from setParentTags for "<<tagName<<":"<<endl;
+    for (auto tag :parentTags)
+    {
+      cout<<tag.name<<endl;
+    }
+
+    cout<<"in setParentTags function"<<endl;*/
     return parentTags;
 }
 
@@ -152,10 +200,14 @@ vector <Tag> updateTagsWithParentTags(const vector<Tag>& tags)
         vector<Tag> tempParentTags=setParentTags(tags, tag.name);
         tag.setParentTags(tempParentTags);
         tags_.push_back(tag);
-        //cout<<"Parent tags for "<< tag.name <<":"<< endl;
-        //tag.getParentTags();
+        /*if (tag.name=="tag7")
+            {
+            cout<<"Parent tags for "<< tag.name <<":"<< endl;
+            tag.getParentTags();
+            }*/
     }
     //cout<<"Update done"<<endl;
+    //cout<<"in updateTagsWithParentTags function"<<endl;
     return tags_;
 }
 
@@ -253,7 +305,7 @@ string getOutput(string input, const vector<Tag>& tags)
                    //cout<<att.second<<" is found att value"<< endl;
                     if (att.first==query.tempAttKey)
                     {
-                        //cout<<"Size of parent tags for "<<tag.name<<" :"<<tag.parentTags.size()<<endl;
+                       //cout<<"Size of parent tags for "<<tag.name<<" :"<<tag.parentTags.size()<<endl;
                         //cout<<"After getparentTag" <<endl;
                         //tag.getParentTags();
                         if (query.complexQuery || tag.parentTags.size()!=0)
@@ -263,6 +315,10 @@ string getOutput(string input, const vector<Tag>& tags)
                             {
                                 output = att.second;
                                 attFound =true;
+                            }
+                            else
+                            {
+                                output="Not Found!";
                             }
                         }
                         else
@@ -278,6 +334,9 @@ string getOutput(string input, const vector<Tag>& tags)
                     output="Not Found!";
             }
         }
+
+    if (output=="")
+        output="Not Found!";
 
     return output;
 }
@@ -321,6 +380,11 @@ int main()
     {
        cout<< getOutput(inputForQuery_, tags)<<endl;
     }
+
+    /*for (auto tag :tags)
+    {
+        tag.getParentTags();
+    }*/
 
     return 0;
 }
