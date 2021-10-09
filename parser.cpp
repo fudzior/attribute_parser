@@ -7,7 +7,6 @@
 
 using namespace std;
 
-
 class Tag
 {
 public:
@@ -47,31 +46,21 @@ public:
               if (afterEqual && input[i]!='>' && input[i]!=' ' && input[i]!='"')
               {
                   tempAttributeValue.push_back(input[i]);
-                  //cout<< "<tempAttributeValue=" <<tempAttributeValue <<endl;
               }
               else if (!afterEqual && input[i]!='>' && input[i]!=' ' && input[i]!= '=')
               {
                   tempAttributeKey.push_back(input[i]);
-                  //cout<< "tempAttributeKey="<<tempAttributeKey<<endl;
               }
 
               else if (!afterEqual && input[i]=='=')
                 {
                 ++i;
                 afterEqual = true;
-                //cout<< "AFTER EQUAL"<<endl;
                 }
               else if ((afterEqual && input[i]==' ') || (afterEqual && input[i]=='>'))
                 {
                 afterEqual = false;
                 this->attributes.insert({tempAttributeKey,tempAttributeValue});
-                //cout<< "tempAttributeKey="<<tempAttributeKey<<endl;
-                //cout<< "tempAttributeValue=" <<tempAttributeValue <<endl;
-                /*for (const auto& [key, value] : tempTag.attributes)
-                {
-                    cout<< "from constructor" << endl;
-                    cout << key << " = " << value << endl;
-                }*/
                 tempAttributeKey = "";
                 tempAttributeValue = "";
                 }
@@ -97,15 +86,12 @@ vector<Tag> setTags(const vector<string>& inputs)
 
     for (auto input: inputs)
     {
-        //if ((input.substr(0,4)=="<tag") || (input.substr(0,5)=="</tag"))
-        //{
         Tag tempTag;
         int positionAfterName = tempTag.setName(input);
         tempTag.setAttributes(input,positionAfterName);
         tags.push_back(tempTag);
-        //}
     }
-    //cout<<"in setTags funcion"<<endl;
+
     return tags;
 }
 
@@ -125,50 +111,19 @@ vector<Tag> setParentTags(const vector <Tag>& tags, const string& tagName)
         }
     }
 
-    /*if (tagName=="tag7")
-    {
-        cout<<"Parent tags for tag7 before erase:"<<endl;
-      for (auto tag : parentTags)
-      {
-          cout<<tag.name<<endl;
-      }
-      cout<<"From setparenttags for "<<tagName<<endl<<":"<<endl;
-    }*/
-
     if (parentTags.begin()!=parentTags.end())
     {
         for (auto it=parentTags.begin(); it<(parentTags.end()-1);)
         {
             bool itEreased =false;
-            /*if (tagName=="tag7")
-                cout<< "Looking for /tag for tag:"<<(*it).name<<endl;*/
+
             for (auto it2=(it+1); it2<parentTags.end();)
             {
-                /*if (tagName=="tag7")
-                    cout<<(*it2).name<<endl;
-                if (tagName=="tag7")
-                {
-                    cout << "Parent tag: " << (*it2).name << "has on 0 pos: " << (*it2).name[0] <<endl;
-                    cout<< "Its name without / is: "<< (*it2).name.substr(1,(*it2).name.size())<<endl;
-                }*/
                 if ((*it2).name[0]=='/' && (*it2).name.substr(1,(*it2).name.size())==(*it).name)
                 {
-                    /*if (tagName=="tag7")
-                    {
-                        cout<<"(*it).name="<<(*it).name<<endl;
-                        cout<<"(*it2).name.substr(1,(*it2).name.size())="<<(*it2).name.substr(1,(*it2).name.size())<<endl;
-                        cout<<"Erase it2:"<<(*it2).name<<endl;
-                    }*/
                     parentTags.erase(it2);
-                    /*if (tagName=="tag7")
-                    {
-                        cout<<"After erase it2="<<(*it2).name<<endl;
-                        cout<<"Erase it:"<<(*it).name<<endl;
-                    }*/
                     parentTags.erase(it);
                     itEreased=true;
-                    /*if (tagName=="tag7")
-                        cout<<"After erase it="<<(*it).name<<endl;*/
                     break;
                 }
                 else
@@ -181,13 +136,6 @@ vector<Tag> setParentTags(const vector <Tag>& tags, const string& tagName)
         }
     }
 
-    /*cout<<"Parent tags from setParentTags for "<<tagName<<":"<<endl;
-    for (auto tag :parentTags)
-    {
-      cout<<tag.name<<endl;
-    }
-
-    cout<<"in setParentTags function"<<endl;*/
     return parentTags;
 }
 
@@ -200,14 +148,8 @@ vector <Tag> updateTagsWithParentTags(const vector<Tag>& tags)
         vector<Tag> tempParentTags=setParentTags(tags, tag.name);
         tag.setParentTags(tempParentTags);
         tags_.push_back(tag);
-        /*if (tag.name=="tag7")
-            {
-            cout<<"Parent tags for "<< tag.name <<":"<< endl;
-            tag.getParentTags();
-            }*/
     }
-    //cout<<"Update done"<<endl;
-    //cout<<"in updateTagsWithParentTags function"<<endl;
+
     return tags_;
 }
 
@@ -258,18 +200,18 @@ public:
     void setProperQuery(const vector <Tag>& tags)
     {
         for (auto tag : tags)
+        {
             if (tag.name==this->tagName)
             {
                 if (tag.parentTags.size()!=0)
                 {
-                    //cout<< tempTag << " is complex tag. Parents: " << endl;
                     for (auto tag_: tag.parentTags)
                     {
                         this->properQuery+=tag_.name + ".";
-                        //cout<< tag.name <<" "<< endl;
                     }
                 }
             }
+        }
     }
 
     Query(const string& input_, const vector <Tag>& tags_)
@@ -279,10 +221,8 @@ public:
         setPosDotAndPosTilde(input);
         setTagNameAndComplexQuery(input);
         setTempAttKey(input);
-        //parentTags = setParentTags(tags, tagName);
         setProperQuery(tags_);
     }
-
 };
 
 string getOutput(string input, const vector<Tag>& tags)
@@ -291,43 +231,30 @@ string getOutput(string input, const vector<Tag>& tags)
     bool attFound = false;
 
     Query query(input,tags);
-    //query.setup(input, tags);
 
     for (auto tag : tags)
         {
             if (tag.name==query.tagName)
             {
-                /*if (complexTag)
-                    cout<<tempTag<<" is complex tag"<< endl;*/
                 for (auto att : tag.attributes)
                 {
-                    //cout<<att.first<<" is found att key"<< endl;
-                   //cout<<att.second<<" is found att value"<< endl;
                     if (att.first==query.tempAttKey)
                     {
-                       //cout<<"Size of parent tags for "<<tag.name<<" :"<<tag.parentTags.size()<<endl;
-                        //cout<<"After getparentTag" <<endl;
-                        //tag.getParentTags();
                         if (query.complexQuery || tag.parentTags.size()!=0)
                         {
-                            //cout<<query.tagName<<" in if"<< endl;
                             if (input.substr(0, query.posDot+1)==query.properQuery)
                             {
                                 output = att.second;
                                 attFound =true;
                             }
                             else
-                            {
                                 output="Not Found!";
-                            }
                         }
                         else
                         {
-                            //cout<<query.tagName<<" in else"<< endl;
                             output = att.second;
                             attFound =true;
                         }
-                        ;
                     }
                 }
                 if (!attFound)
@@ -358,7 +285,6 @@ int main()
     vector<string> inputsForQueries = {};
     vector<Tag> tags= {};
 
-
     for (int i=0; i<=n; ++i)
     {
         getline(cin, inputForTag);
@@ -380,11 +306,6 @@ int main()
     {
        cout<< getOutput(inputForQuery_, tags)<<endl;
     }
-
-    /*for (auto tag :tags)
-    {
-        tag.getParentTags();
-    }*/
 
     return 0;
 }
